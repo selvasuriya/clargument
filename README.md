@@ -1,9 +1,14 @@
 # clargument
-command line argument parser
-A command line interpreter that interprets long and short options(flags),
-options can also take user inputted data, positional arguments are also supported.
+Command line argument parser.
 
-The code is implemented with functional and object oriented approach.
+**Usage**
+    A command line interpreter that interprets long and short options(flags), short options can be grouped, options can also take user inputted data,
+an option can take a single data, multiple data or repeating data of any order, positional arguments are also supported.
+The "--" command line argument can be inputted to separate different options whenever needed,
+one typical use case is to tell the end of a repeating data when the data is followed immediately by a positional argument.
+
+**About**
+    The code is implemented with functional and object oriented approach.
 
 * Identification of the ranges that would yield unabiguously the user inputted name value pairs(when processed linearly),
 from the user inputted command line arguments is handled with a functional approach by the module DataArgExtractor.py
