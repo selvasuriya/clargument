@@ -1,34 +1,3 @@
-#todo throwing exception when getEnd() accessed before closing
-class RightHeadedRange:
-    """
-
-    initialises with an int value for the start property,
-    None for the end property
-
-    both properties can be accessed with getters
-    close() method sets the end property with an int value greater than the start property only when the object is not closed
-    it can be checked if the end property is set with isClosed() method
-
-    start and end properties are meant to model start and end index of a range of list elements
-
-    """
-    def __init__(self, start):
-        self.start = start
-        self.end = None
-
-    def getStart(self):
-        return self.start
-
-    def getEnd(self):
-        return self.end
-
-    def isClosed(self):
-        return self.getEnd() is not None
-
-    def close(self, end):
-        if not self.isClosed() and end >= self.getStart():
-            self.end = end
-
 class Range:
     """
 
@@ -49,6 +18,52 @@ class Range:
 
     def getEnd(self):
         return self.end
+
+    def split(self, at):
+        if at > self.getStart() and at < self.getEnd():
+            tmp = self.end
+            self.end = at
+            return tmp
+
+    def __str__(self):
+        return f"start {self.getStart()} end {self.getEnd()}"
+
+#todo throwing exception when getEnd() accessed before closing
+class RightHeadedRange(Range):
+    """
+
+    initialises with an int value for the start property,
+    None for the end property
+
+    both properties can be accessed with getters
+    close() method sets the end property with an int value greater than the start property only when the object is not closed
+    it can be checked if the end property is set with isClosed() method
+
+    start and end properties are meant to model start and end index of a range of list elements
+
+    """
+    def __init__(self, start):
+        super(RightHeadedRange, self).__init__(start, None)
+
+    def isClosed(self):
+        return self.getEnd() is not None
+
+    def close(self, end):
+        if not self.isClosed() and end >= self.getStart():
+            self.end = end
+
+    def split(self, at):
+        if self.isClosed():
+            return super(RightHeadedRange, self).split(at)
+
+#rng = RightHeadedRange(4)
+#print(rng, rng.isClosed())
+#rng.close(14)
+#print(rng, rng.isClosed())
+#rng2 = RightHeadedRange(6)
+#print(rng, rng.isClosed(), rng2, rng2.isClosed())
+#rng2.close(rng.split(6))
+#print(rng, rng.isClosed(), rng2, rng2.isClosed())
 
 #todo exception throwing when isValid() accessed before consumption
 class ConsumedField:
@@ -93,6 +108,14 @@ class Field:
     def __init__(self, start, end):
         self.rng = Range(start, end)
         self.unconsumed_start = self.rng.getStart()
+
+    def split(self, at):
+        fld = Field(at, self.rng.split(at))
+        if self.getUnconsumedStart() > self.getLimit():
+            noverflow = self.show()
+            self.unconsumed_start+=noverflow
+            fld.consume(-noverflow)
+        return fld
 
     def getLimit(self):
         return self.rng.getEnd()
@@ -171,6 +194,9 @@ class Field:
         consumed_field.consume(self.getUnconsumedStart(), isvalid)
         return consumed_field
 
+    def __str__(self):
+        return f"rng {self.rng.getStart()} {self.rng.getEnd()}\nunconsumed_start {self.getUnconsumedStart()}"
+
 class Piece:
     """
     
@@ -186,3 +212,7 @@ class Piece:
         self.type = typ
         self.sub_type = sub_type
 
+#fld = Field(1,4)
+#print(fld)
+#print(fld.split(2))
+#print(fld)
