@@ -1,5 +1,6 @@
 import re
 import functools
+from Field import Field
 
 """
 an arg
@@ -51,6 +52,12 @@ grouped short input names
 
 value input
     this data arg only originates from direct args
+
+Capability:
+    This locator is capable of locating short options (-s), long options (--search), grouped short options (-sp), argument value (45, myfirst.txt).
+
+    The following are discarded a single character after the "--" string (--s), when the string "--" is used alone ("--"), when the string "-" is used alone ("-"), when the string "-" is followed by a string containing any character other than the english alphabet (-*, -j&j), when the string "--" is followed by a string containing any character other than the english alphabet, common numeral digits and the underscore character (--ha@m).
+
 """
 
 # individual args processing
@@ -81,14 +88,84 @@ def parseLongInputNameArg(arg):
 def parseGroupedShortInputNamesArg(arg):
     return parseSinglyEscapedArg(arg) if parseSinglyEscapedArg(arg) is not None and len(parseSinglyEscapedArg(arg)) > 1 and parseSinglyEscapedArg(arg).isalpha() else None
 
+class ArgumentSink:
+
+    def __init__(self, valued_arguments):
+        self.args = {}
+        self.valued_arguments = valued_arguments
+
+    def getBodyHavingArgumentName(self, darg):
+        """checks if the short options list darg ends with a valued short option(which must be present in the validating data 'valued_arguments')."""
+        return darg[-1] if darg and darg[-1] in self.valued_arguments else None
+
+    def insertName(self, k, n):
+        if k in self.args and n:
+            if self.args[k][1] is None:
+                self.args[k][1] = n
+            return True
+        return False
+
+    def insertValue(self, k, v):
+        if k in self.args and v:
+            if self.args[k][2] is None:
+                self.args[k][2] = v
+            return True
+        return False
+
+    def addRaw(self, k, r):
+        if r:
+            if k not in self.args:
+                self.args[k] = [r, None, None]
+                self.insertName(k, self.getBodyHavingArgumentName(r))
+            return True
+        return False
+
+    def getRaw(self, k):
+        return self.args[k][0] if k in self.args else None
+
+    def getName(self, k):
+        return self.args[k][1] if k in self.args else None
+
+    def getArg(self, k):
+        return self.args[k][1:] if k in self.args else None
+
+    def __str__(self):
+        o = ""
+        for k, arg in self.args.items():
+            o = f"{o}\nindex {k} raw {arg[0]} name {arg[1]} body {arg[2]}"
+        return o
+
 # DataArgExtractor
 
 class DataArgExtractor:
 
-    def __init__(self, validating_data):
+    def __init__(self, args, validating_data, arg_sink):
+        args.insert(0, "--")
+        self.args = args
         self.validating_data = validating_data
+        self.arg_sink = arg_sink
 
-    def extractArgumentNamesFromEscapedArg(self, arg):
+    def getArgsLen(self):
+        return len(self.args)
+
+    def catchEscapedArgsAndProduceFields(self):
+        escaped_locations = [i for i, arg in zip(range(len(self.args)), self.args) if parseEscapedArg(arg) is not None]
+        moved_escaped_locations = escaped_locations[1:]
+        moved_escaped_locations.append(self.getArgsLen())
+
+        for i in escaped_locations:
+            self.extractArgumentNamesFromEscapedArg(i) 
+        escape_past_locations = [i+1 for i in escaped_locations]
+
+        return ([Field(i, j) for i, j in zip(escape_past_locations, moved_escaped_locations)], escaped_locations)
+
+    def extractValues(self, k, rng):
+        args = self.args[rng.getStart():rng.getEnd()]
+        if all(parseDirectArg(b) is not None for b in args):
+            return self.arg_sink.insertValue(k, args)
+        return False
+
+    def extractArgumentNamesFromEscapedArg(self, i):
         """
         An arg head is the name of the argument.
         Argument names are the first element of any named argument.
@@ -105,43 +182,41 @@ class DataArgExtractor:
         all others are ignored by returning an empty list.
         """
 
-        dataarg = self.parseLongInputNameArg(arg)
-        if dataarg is not None:
-            return [self.validating_data["long_input_names"][dataarg]]
+        def extractShortInputNameArg(i):
+            """checks if the short option is present in the validating_data['short_input_names']"""
+            arg = self.args[i]
+            if parseShortInputNameArg(arg) is not None and parseShortInputNameArg(arg) in self.validating_data["short_input_names"]:
+                return self.arg_sink.addRaw(i, [parseShortInputNameArg(arg)])
+            return False
 
-        dataarg = self.parseShortInputNameArg(arg)
-        if dataarg is not None:
-            return [dataarg]
+        def extractLongInputNameArg(i):
+            """checks if the long option is present in the validating_data['long_input_names']"""
+            arg = self.args[i]
+            if parseLongInputNameArg(arg) is not None and parseLongInputNameArg(arg) in self.validating_data["long_input_names"]:
+                return self.arg_sink.addRaw(i, [self.validating_data["long_input_names"][parseLongInputNameArg(arg)]])
+            return False
 
-        return self.parseGroupedShortInputNamesArg(arg)
+        def extractGroupedShortInputNamesArg(i):
+            """checks if the grouped short options are all flags(which must be present in the validating_data['flags']) optionally ended with a valued/flag short option(which must be present in the validating_data['short_input_names'])."""
+    
+            arg = self.args[i]
 
-    def parseShortInputNameArg(self, arg):
-        return parseShortInputNameArg(arg) if parseShortInputNameArg(arg) is not None and parseShortInputNameArg(arg) in self.validating_data["short_input_names"] else None
-
-    def parseLongInputNameArg(self, arg):
-        return parseLongInputNameArg(arg) if parseLongInputNameArg(arg) is not None and parseLongInputNameArg(arg) in self.validating_data["long_input_names"] else None
-
-    def parseGroupedShortInputNamesArg(self, arg):
-        if parseGroupedShortInputNamesArg(arg) is not None:
-            short_input_names = list(parseGroupedShortInputNamesArg(arg))
-            if len(short_input_names) > 0:
+            def filterFlags(short_input_names):
+                """checks if the short options are flags i.e., present in the validating_data['flags']"""
+                return list(set(short_input_names) & set(self.validating_data["flags"]))
+    
+            if parseGroupedShortInputNamesArg(arg) is not None:
+                short_input_names = list(parseGroupedShortInputNamesArg(arg))
                 front_one = short_input_names[-1]
                 short_input_names = [v for v in short_input_names if v is not front_one]
-                short_input_names = self.filterValidShortInputNames(short_input_names)
+                short_input_names = filterFlags(short_input_names)
                 if front_one in self.validating_data["short_input_names"]:
                     short_input_names.append(front_one) 
-            return short_input_names
-        return []
+                return self.arg_sink.addRaw(i, short_input_names) if short_input_names else False
 
-    def parseValueArg(self, arg):
-        return parseDirectArg(arg)
+            return False
 
-    def filterValidShortInputNames(self, short_input_names):
-        return list(set(short_input_names) & set(self.validating_data["flags"]))
-
-    def getBodyHavingArgumentName(self, arg):
-        darg = self.extractArgumentNamesFromEscapedArg(arg)
-        return darg[-1] if darg and darg[-1] in self.validating_data["named_valued_arguments"] else None
+        return (extractLongInputNameArg(i) or extractShortInputNameArg(i) or extractGroupedShortInputNamesArg(i))
 
 # test operation
 
@@ -149,17 +224,12 @@ if __name__ == "__main__":
 
     import sys
 
-    dex = DataArgExtractor({
-        "short_input_names": ["s", "p"],
-        "long_input_names": ["spec", "peck"],
-        "flags": ["p"],
-        "named_valued_arguments": []
-    })
+    dex = DataArgExtractor(sys.argv[1:], {
+        "short_input_names": ["s", "p", "c", "d"],
+        "long_input_names": {"spec": "s", "peck":"p"},
+        "flags": ["p", "s"]
+    },
+    ArgumentSink(["c", "d"]))
+    dex.catchEscapedArgsAndProduceFields()
 
-    print()
-    for arg in sys.argv[1:]:
-        print("short", dex.parseShortInputNameArg(arg))
-        print("long", dex.parseLongInputNameArg(arg))
-        print("group", dex.parseGroupedShortInputNamesArg(arg))
-        print("value", dex.parseValueArg(arg))
-        print()
+    print(dex.arg_sink.args)

@@ -19,6 +19,9 @@ class Range:
     def getEnd(self):
         return self.end
 
+    def getSpan(self):
+        return self.end - self.start
+
     def split(self, at):
         if at > self.getStart() and at < self.getEnd():
             tmp = self.end
@@ -90,6 +93,9 @@ class ConsumedField:
 
     def isValid(self):
         return self.isvalid
+
+    def __str__(self):
+        return f"validity {self.isValid()} {self.rng}"
 
 class Field:
     """
@@ -195,7 +201,7 @@ class Field:
         return consumed_field
 
     def __str__(self):
-        return f"rng {self.rng.getStart()} {self.rng.getEnd()}\nunconsumed_start {self.getUnconsumedStart()}"
+        return f"{self.rng} unconsumed_start {self.getUnconsumedStart()}"
 
 class Piece:
     """
@@ -211,6 +217,9 @@ class Piece:
         self.consumed_field = consumed_field
         self.type = typ
         self.sub_type = sub_type
+
+    def __str__(self):
+        return f"{self.type} {self.sub_type} {self.consumed_field}"
 
 #fld = Field(1,4)
 #print(fld)
