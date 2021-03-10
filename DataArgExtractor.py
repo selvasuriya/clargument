@@ -90,13 +90,13 @@ def parseGroupedShortInputNamesArg(arg):
 
 class ArgumentSink:
 
-    def __init__(self, valued_arguments):
+    def __init__(self, validating_data):
         self.args = {}
-        self.valued_arguments = valued_arguments
+        self.validating_data = validating_data
 
     def getBodyHavingArgumentName(self, darg):
         """checks if the short options list darg ends with a valued short option(which must be present in the validating data 'valued_arguments')."""
-        return darg[-1] if darg and darg[-1] in self.valued_arguments else None
+        return darg[-1] if darg and darg[-1] in self.validating_data["valued_arguments"] else None
 
     def insertName(self, k, n):
         if k in self.args and n:
@@ -192,7 +192,7 @@ class DataArgExtractor:
         def extractLongInputNameArg(i):
             """checks if the long option is present in the validating_data['long_input_names']"""
             arg = self.args[i]
-            if parseLongInputNameArg(arg) is not None and parseLongInputNameArg(arg) in self.validating_data["long_input_names"]:
+            if parseLongInputNameArg(arg) is not None and parseLongInputNameArg(arg) in self.validating_data["long_input_names"] and self.validating_data["long_input_names"][parseLongInputNameArg(arg)] in self.validating_data["short_input_names"]:
                 return self.arg_sink.addRaw(i, [self.validating_data["long_input_names"][parseLongInputNameArg(arg)]])
             return False
 
@@ -229,7 +229,9 @@ if __name__ == "__main__":
         "long_input_names": {"spec": "s", "peck":"p"},
         "flags": ["p", "s"]
     },
-    ArgumentSink(["c", "d"]))
+    ArgumentSink({
+        "valued_arguments":["c", "d"]
+    }))
     dex.catchEscapedArgsAndProduceFields()
 
     print(dex.arg_sink.args)
