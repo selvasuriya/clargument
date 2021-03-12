@@ -1,4 +1,4 @@
-# clargument
+# Paraivari
 Command line argument parser.
 
 **Usage**
