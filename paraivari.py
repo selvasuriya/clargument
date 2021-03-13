@@ -21,12 +21,52 @@ Overloading:
 flag declaration:
    declaring flags in argument_value_properties is optional, flags are declared in the boolean_params and switches
 
+sample:
+
+    config_data = {
+        "command": {
+            "short_input_names": [],
+            "long_input_names": {},
+            "positional_arguments": [],
+            "argument_value_properties": {},
+            "global_defaults": {},
+            "boolean_params": [],
+            "switches": [],
+            "overloading": [
+                            {
+                    "local": [],
+                    "local_defaults": {},
+                    "func": None
+                }
+            ]
+        }
+    }
+
 !!!todo
+minor
    fetching data if any from failed Argument formations by the user. (these are now completely ignored)
+
+major
+   testing
+   documentation
+   api implementation
+   extending command parsing
+   deployment
 """
 
 def parse(args, config_data):
-    print(parseCmd(args, config_data).triggerAction())
+    cmdargs = parseCmd(args, config_data)
+    if cmdargs:
+        print(cmdargs.triggerAction())
+    else:
+        print("refer to help for more information about using the app.")
+
+def parseControl(args, config_data):
+    cmdargs = parseCmd(args, config_data)
+    if cmdargs:
+        cmdargs.triggerAction()
+    else:
+        print("refer to help for more information about using the app.")
 
 if __name__ == "__main__":
 

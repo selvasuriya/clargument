@@ -24,6 +24,17 @@
 * "--":
    can be used anywhere between two arguments, used especially after a repeating value if the repeating value was followed by a positional argument, for removing the ambiguity in identifying the arguments separately if any.
 
+* Multiple Versions of Options:
+   options occurring repeatedly won't be ignored. Flags will be counted. Valued options can occur repeatedly with their multiple values being split between different occurances in order.
+
+* Default Values:
+
+* optional and required arguments:
+
+* grouping the arguments:
+
+* overloading commands based on the type(by argument name) and number of arguments:
+
 
 **To be implemented:**
 
@@ -44,19 +55,8 @@
 
 * Min and Max number of Values:
 
-* Multiple Versions of Options:
-   options occurring repeatedly won't be ignored. Flags will be counted. Valued options can occur repeatedly with their multiple values being split between different occurances in order.
-
 
 **Later:**
-
-* Default Values:
-
-* optional and required arguments:
-
-* grouping the arguments:
-
-* overloading commands based on the type(by argument name) and number of arguments:
 
 * validations:
 

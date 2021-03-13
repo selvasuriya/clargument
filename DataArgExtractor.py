@@ -38,6 +38,7 @@ class DataArgExtractor:
         return len(self.args)
 
     def extractValuedArgument(self, k, n, consumed):
+        print(n, consumed)
         if consumed.isValid():
             args = self.args[consumed.rng.getStart():consumed.rng.getEnd()]
             if all(parseDirectArg(b) is not None for b in args):
@@ -64,6 +65,7 @@ class DataArgExtractor:
             """
 
             def sinkEscaped(i, n, field):
+                print(n, field)
                 if n in self.validating_data["flags"]:
                     return self.arg_sink.sinkFlag(i, n)
                 elif n in self.validating_data["valued_arguments"]:
@@ -97,6 +99,7 @@ class DataArgExtractor:
                 return front_one_sink or flag_sink
 
             arg = self.args[i]
+            print(arg, field)
             if parseShortInputNameArg(arg) is not None:
                 return sinkShortInputNameArg(arg)
             elif parseLongInputNameArg(arg) is not None:

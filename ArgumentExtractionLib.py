@@ -212,7 +212,7 @@ class Arguments:
         ovl = self.findOverloadMatch()
         if ovl:
             self.setDefaults(self.generateDefaults(ovl))
-            if "func" in ovl:
+            if "func" in ovl and ovl["func"]:
                 return ovl["func"](self.args)
             return "You have not set a function to your overload. You can follow the docs if you need any help :D"
         return self.defaultFunc()

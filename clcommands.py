@@ -15,10 +15,12 @@ args:
 
 def parse(args, config_data):
     command = args[0]
-    args = args[1:]
     if command in config_data:
+        args = args[1:]
         return argparse(args, config_data[command])
-    return []
+    elif "thedirectcommand" in config_data:
+        return argparse(args, config_data["thedirectcommand"])
+    return None
 
 
 if __name__ == "__main__":
