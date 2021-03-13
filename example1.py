@@ -27,7 +27,7 @@ config_data = {
             },
                         {
                 "local": ["d"],
-                "func": lambda a: "hai the mail is posted"
+                "func": lambda a: f"hai the mail is posted{a['k'].value}"
             },
                         {
                 "local": ["l"],

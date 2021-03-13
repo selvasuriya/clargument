@@ -183,6 +183,9 @@ class Field:
         consumed_field = ConsumedField(self.getUnconsumedStart())
         isvalid = self.acquireStretchy(unit_length)
         consumed_field.consume(self.getUnconsumedStart(), isvalid)
+
+        self.acquireAll() #Destroys the seen but not acquirable. This is lost(because it is not recorded into the ConsumedField object which is returned).
+
         return consumed_field
 
     def consumeHard(self, length):
@@ -192,12 +195,11 @@ class Field:
         If the consumption fails all the available unconsumed range is consumed and the ConsumedField object returned will have isvalid set to False.
         """
         consumed_field = ConsumedField(self.getUnconsumedStart())
-
         isvalid = self.acquire(length)
         if not isvalid:
-            self.acquireAll()
-
+            self.acquireAll() #Destroys the seen but not acquirable. This is lost(because of being invalid).
         consumed_field.consume(self.getUnconsumedStart(), isvalid)
+
         return consumed_field
 
     def __str__(self):

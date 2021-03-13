@@ -152,7 +152,7 @@ class ArgumentSink:
         return False
 
     def sinkValuedArgument(self, k, n, v):
-        if k not in self.locations and n and v:
+        if k not in self.locations and n:
             self.locations[k] = ValuedArgument(n, k)
             return self.locations[k].insertValue(v)
         return False

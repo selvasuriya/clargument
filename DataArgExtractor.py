@@ -14,11 +14,7 @@ class FieldConsumer:
 
     def consumeBody(self, field, argument_name):
         if self.validating_data["argument_value_properties"][argument_name][1]:
-            consumed = field.consumeElastic(self.validating_data["argument_value_properties"][argument_name][0])
-            if consumed.rng.getSpan() is not 0:
-                return consumed
-            else:
-                return field.consumeHard(self.validating_data["argument_value_properties"][argument_name][0])
+            return field.consumeElastic(self.validating_data["argument_value_properties"][argument_name][0])
         else:
             return field.consumeHard(self.validating_data["argument_value_properties"][argument_name][0])
 
@@ -38,7 +34,6 @@ class DataArgExtractor:
         return len(self.args)
 
     def extractValuedArgument(self, k, n, consumed):
-        print(n, consumed)
         if consumed.isValid():
             args = self.args[consumed.rng.getStart():consumed.rng.getEnd()]
             if all(parseDirectArg(b) is not None for b in args):
@@ -65,7 +60,6 @@ class DataArgExtractor:
             """
 
             def sinkEscaped(i, n, field):
-                print(n, field)
                 if n in self.validating_data["flags"]:
                     return self.arg_sink.sinkFlag(i, n)
                 elif n in self.validating_data["valued_arguments"]:
@@ -99,7 +93,6 @@ class DataArgExtractor:
                 return front_one_sink or flag_sink
 
             arg = self.args[i]
-            print(arg, field)
             if parseShortInputNameArg(arg) is not None:
                 return sinkShortInputNameArg(arg)
             elif parseLongInputNameArg(arg) is not None:
@@ -109,12 +102,13 @@ class DataArgExtractor:
             return False
 
         escaped_locations = [i for i, arg in zip(range(self.getArgsLen()), self.args) if parseEscapedArg(arg) is not None]
-
-        moved_escaped_locations = escaped_locations[1:]
+        moved_escaped_locations = []
+        if len(escaped_locations) > 1:
+            moved_escaped_locations = escaped_locations[1:]
         moved_escaped_locations.append(self.getArgsLen())
         escape_past_locations = [i+1 for i in escaped_locations]
-        self.fields = [Field(i, j) for i, j in zip(escape_past_locations, moved_escaped_locations)]
 
+        self.fields = [Field(i, j) for i, j in zip(escape_past_locations, moved_escaped_locations)]
         for i, field in zip(escaped_locations, self.fields):
             extractArgumentNamesFromEscapedArg(i, field)
 
