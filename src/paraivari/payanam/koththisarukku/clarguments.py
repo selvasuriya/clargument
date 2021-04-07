@@ -1,8 +1,7 @@
-from DataArgExtractor import DataArgExtractor
-from ArgumentExtractionLib import ArgumentSink
-from ArgumentExtractionLib import Arguments
-from DataArgExtractor import FieldConsumer
-import sys
+from paraivari.payanam.koththisarukku.DataArgExtractor import DataArgExtractor
+from paraivari.payanam.koththisarukku.ArgumentExtractionLib import ArgumentSink
+from paraivari.payanam.koththisarukku.ArgumentExtractionLib import Arguments
+from paraivari.payanam.koththisarukku.DataArgExtractor import FieldConsumer
 
 """
 Arguments:
@@ -154,6 +153,8 @@ def parse(args, config_data):
 
 
 if __name__ == "__main__":
+
+    import sys
 
     config_data = {
         "short_input_names": ["d"],

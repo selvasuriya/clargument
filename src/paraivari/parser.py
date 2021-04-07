@@ -1,5 +1,4 @@
-from clcommands import parse as parseCmd
-import sys
+from paraivari.payanam.clcommands import parse as parseCmd
 
 """
 boolean:
@@ -23,7 +22,7 @@ flag declaration:
 
 sample:
 
-    config_data = {
+>>> config_data = {
         "command": {
             "short_input_names": [],
             "long_input_names": {},
@@ -68,7 +67,16 @@ def parseControl(args, config_data):
     else:
         print("refer to help for more information about using the app.")
 
+def parseLog(args, config_data):
+    cmdargs = parseCmd(args, config_data)
+    if cmdargs:
+        return cmdargs.triggerAction()
+    else:
+        return "refer to help for more information about using the app."
+
 if __name__ == "__main__":
+
+    import sys
 
     def createNote(args):
         return f"create note name {args['c'].value[0]} body {args['b'].value[0]}"

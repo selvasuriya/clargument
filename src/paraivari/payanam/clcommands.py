@@ -1,5 +1,4 @@
-from clarguments import parse as argparse
-import sys
+from paraivari.payanam.koththisarukku.clarguments import parse as argparse
 
 """
 config_data:
@@ -28,6 +27,8 @@ def parse(args, config_data):
 
 
 if __name__ == "__main__":
+
+    import sys
 
     config_data = {
         "command": {

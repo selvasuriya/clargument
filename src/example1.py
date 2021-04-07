@@ -1,4 +1,4 @@
-from paraivari import parse
+from paraivari.parser import parse
 import sys
 
 

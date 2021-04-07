@@ -1,4 +1,4 @@
-from paraivari import parseControl as parse
+from paraivari.parser import parseControl as parse
 import sys
 
 quotes = ('A man is not complete until he is married. Then he is finished.',

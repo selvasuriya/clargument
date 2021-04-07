@@ -1,10 +1,10 @@
-from Field import Field
-from ArgumentExtractionLib import ArgumentSink
-from ArgumentExtractionLib import parseEscapedArg
-from ArgumentExtractionLib import parseShortInputNameArg
-from ArgumentExtractionLib import parseLongInputNameArg
-from ArgumentExtractionLib import parseGroupedShortInputNamesArg
-from ArgumentExtractionLib import parseDirectArg
+from paraivari.payanam.koththisarukku.Field import Field
+from paraivari.payanam.koththisarukku.ArgumentExtractionLib import ArgumentSink
+from paraivari.payanam.koththisarukku.ArgumentExtractionLib import parseEscapedArg
+from paraivari.payanam.koththisarukku.ArgumentExtractionLib import parseShortInputNameArg
+from paraivari.payanam.koththisarukku.ArgumentExtractionLib import parseLongInputNameArg
+from paraivari.payanam.koththisarukku.ArgumentExtractionLib import parseGroupedShortInputNamesArg
+from paraivari.payanam.koththisarukku.ArgumentExtractionLib import parseDirectArg
 
 
 class FieldConsumer:
